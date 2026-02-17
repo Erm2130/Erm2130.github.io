@@ -70,18 +70,15 @@
         const GET_INFO_URL = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-get-info';
         const WEBHOOK_URL  = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-receiver';
 
-        // ดึง thread_id จาก startapp (Mini App) หรือ query string (browser)
         const startParam = tg.initDataUnsafe?.start_param || '';
         const urlParams  = new URLSearchParams(window.location.search);
         const threadId   = startParam || urlParams.get('thread') || '';
 
         async function loadUserInfo() {
             try {
-                // เปลี่ยนเป็น POST ส่ง thread_id ใน body
-                const res = await fetch(GET_INFO_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ thread_id: threadId })
+                // ใช้ GET + query string ไม่มี preflight ไม่โดน CORS block
+                const res = await fetch(`${GET_INFO_URL}?thread_id=${encodeURIComponent(threadId)}`, {
+                    method: 'GET'
                 });
 
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -90,7 +87,6 @@
                 let data;
                 try {
                     data = JSON.parse(text);
-                    // กรณี n8n ส่ง JSON string ซ้อนมา
                     if (typeof data === 'string') data = JSON.parse(data);
                 } catch {
                     throw new Error('parse error');
