@@ -14,8 +14,13 @@
             <p class="text-sm text-gray-500 mt-1">กรุณากรอกรหัส 6 หลักเพื่อทำรายการ</p>
         </div>
 
-        <!-- Section แสดงข้อมูลผู้ใช้ที่ส่งมาจาก n8n -->
-        <div class="mb-6 p-4 bg-blue-50 rounded-xl">
+        <!-- Loading State -->
+        <div id="loading" class="mb-6 p-4 bg-blue-50 rounded-xl text-center">
+            <p class="text-sm text-blue-600">⏳ กำลังโหลดข้อมูล...</p>
+        </div>
+
+        <!-- User Info (hidden until loaded) -->
+        <div id="userInfo" class="mb-6 p-4 bg-blue-50 rounded-xl hidden">
             <div class="flex justify-between mb-1">
                 <span class="text-xs text-blue-600 uppercase font-semibold">ชื่อลูกค้า</span>
                 <span id="name" class="text-sm font-bold text-blue-900">-</span>
@@ -24,6 +29,11 @@
                 <span class="text-xs text-blue-600 uppercase font-semibold">ธนาคาร</span>
                 <span id="bank" class="text-sm font-bold text-blue-900">-</span>
             </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorInfo" class="mb-6 p-4 bg-red-50 rounded-xl hidden">
+            <p class="text-sm text-red-600 text-center">❌ ไม่พบข้อมูล กรุณาติดต่อผู้ดูแล</p>
         </div>
 
         <form id="otpForm" class="space-y-6">
@@ -55,25 +65,40 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ดึงจาก startapp parameter (เปิดผ่าน t.me/BOT/APP?startapp=...)
-        // และ fallback ไปที่ URL query string (กรณีเปิดผ่าน browser ปกติ)
-        let params;
-        const rawParam = tg.initDataUnsafe?.start_param || '';
+        const GET_INFO_URL = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-get-info';
+        const WEBHOOK_URL  = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-receiver';
 
-        if (rawParam) {
-            params = new URLSearchParams(decodeURIComponent(rawParam));
-        } else {
-            params = new URLSearchParams(window.location.search);
+        let threadId = null;
+
+        // ดึง thread_id จาก startapp (เปิดผ่าน t.me) หรือ query string (เปิดผ่าน browser)
+        const startParam = tg.initDataUnsafe?.start_param || '';
+        const urlParams  = new URLSearchParams(window.location.search);
+
+        threadId = startParam || urlParams.get('thread') || '';
+
+        async function loadUserInfo() {
+            try {
+                const res = await fetch(`${GET_INFO_URL}?thread_id=${threadId}`);
+                if (!res.ok) throw new Error('not found');
+                const data = await res.json();
+
+                if (data.name) {
+                    document.getElementById('name').textContent = data.name;
+                    document.getElementById('bank').textContent = data.bank || 'ไม่ระบุ';
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('userInfo').classList.remove('hidden');
+                } else {
+                    throw new Error('no name');
+                }
+            } catch (err) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('errorInfo').classList.remove('hidden');
+            }
         }
 
-        document.getElementById('name').textContent = params.get('name') || 'ไม่ระบุ';
-        document.getElementById('bank').textContent = params.get('bank') || 'ไม่ระบุ';
+        loadUserInfo();
 
-        const webhookUrl = params.get('webhook');
-        const userId = params.get('id');
-        const threadId = params.get('thread');
-
-        const form = document.getElementById('otpForm');
+        const form   = document.getElementById('otpForm');
         const status = document.getElementById('status');
 
         form.onsubmit = async (e) => {
@@ -83,34 +108,33 @@
 
             if (otp.length !== 6) return alert('กรุณากรอกรหัสให้ครบ 6 หลัก');
 
-            btn.disabled = true;
-            btn.innerHTML = 'กำลังตรวจสอบ...';
+            btn.disabled    = true;
+            btn.textContent = 'กำลังตรวจสอบ...';
 
             try {
-                // ส่งข้อมูลกลับไปหา n8n ทาง Webhook
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        id: userId,
+                        id:        threadId,
                         thread_id: threadId,
-                        otp: otp
+                        otp:       otp
                     })
                 });
 
                 if (response.ok) {
                     status.textContent = '✅ ส่งข้อมูลสำเร็จ! กำลังปิดหน้าต่าง...';
-                    status.className = 'mt-4 text-center text-sm font-medium text-green-600';
+                    status.className   = 'mt-4 text-center text-sm font-medium text-green-600';
                     status.classList.remove('hidden');
                     setTimeout(() => tg.close(), 1500);
                 } else {
                     throw new Error();
                 }
             } catch (err) {
-                btn.disabled = false;
-                btn.innerHTML = 'ลองใหม่อีกครั้ง';
+                btn.disabled    = false;
+                btn.textContent = 'ลองใหม่อีกครั้ง';
                 status.textContent = '❌ เกิดข้อผิดพลาด กรุณาลองใหม่';
-                status.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                status.className   = 'mt-4 text-center text-sm font-medium text-red-600';
                 status.classList.remove('hidden');
             }
         };
