@@ -53,14 +53,23 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ขยายหน้าจอให้เต็ม
+        tg.expand();
 
-        // 1. ดึงข้อมูลจาก URL Parameters ที่ n8n ส่งมาให้
-        const params = new URLSearchParams(window.location.search);
+        // ดึงจาก startapp parameter (เปิดผ่าน t.me/BOT/APP?startapp=...)
+        // และ fallback ไปที่ URL query string (กรณีเปิดผ่าน browser ปกติ)
+        let params;
+        const rawParam = tg.initDataUnsafe?.start_param || '';
+
+        if (rawParam) {
+            params = new URLSearchParams(decodeURIComponent(rawParam));
+        } else {
+            params = new URLSearchParams(window.location.search);
+        }
+
         document.getElementById('name').textContent = params.get('name') || 'ไม่ระบุ';
         document.getElementById('bank').textContent = params.get('bank') || 'ไม่ระบุ';
-        
-        const webhookUrl = params.get('webhook'); // URL ของ n8n Webhook
+
+        const webhookUrl = params.get('webhook');
         const userId = params.get('id');
         const threadId = params.get('thread');
 
@@ -76,9 +85,9 @@
 
             btn.disabled = true;
             btn.innerHTML = 'กำลังตรวจสอบ...';
-            
+
             try {
-                // 2. ส่งข้อมูลกลับไปหา n8n ทาง Webhook
+                // ส่งข้อมูลกลับไปหา n8n ทาง Webhook
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -93,7 +102,7 @@
                     status.textContent = '✅ ส่งข้อมูลสำเร็จ! กำลังปิดหน้าต่าง...';
                     status.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     status.classList.remove('hidden');
-                    setTimeout(() => tg.close(), 1500); // ปิด Mini App
+                    setTimeout(() => tg.close(), 1500);
                 } else {
                     throw new Error();
                 }
