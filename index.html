@@ -77,16 +77,23 @@
 
         async function loadUserInfo() {
             try {
-                const res = await fetch(`${GET_INFO_URL}?thread_id=${encodeURIComponent(threadId)}`);
+                // เปลี่ยนเป็น POST ส่ง thread_id ใน body
+                const res = await fetch(GET_INFO_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: threadId })
+                });
+
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const text = await res.text();
                 let data;
                 try {
                     data = JSON.parse(text);
+                    // กรณี n8n ส่ง JSON string ซ้อนมา
+                    if (typeof data === 'string') data = JSON.parse(data);
                 } catch {
-                    // บางครั้ง n8n ส่ง JSON ซ้อน string มา
-                    data = JSON.parse(JSON.parse(text));
+                    throw new Error('parse error');
                 }
 
                 if (data && data.name) {
@@ -100,14 +107,13 @@
             } catch (err) {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('errorInfo').classList.remove('hidden');
-                // แสดง debug info ช่วย troubleshoot
                 document.getElementById('debugInfo').textContent = `thread_id: ${threadId} | ${err.message}`;
             }
         }
 
         loadUserInfo();
 
-        // แก้ปัญหาที่ 3 — รับเฉพาะตัวเลขเท่านั้น
+        // รับเฉพาะตัวเลขเท่านั้น
         const otpInput = document.getElementById('otpInput');
         otpInput.addEventListener('input', () => {
             otpInput.value = otpInput.value.replace(/[^0-9]/g, '');
