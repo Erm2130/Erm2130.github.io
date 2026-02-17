@@ -19,7 +19,7 @@
             <p class="text-sm text-blue-600">⏳ กำลังโหลดข้อมูล...</p>
         </div>
 
-        <!-- User Info (hidden until loaded) -->
+        <!-- User Info -->
         <div id="userInfo" class="mb-6 p-4 bg-blue-50 rounded-xl hidden">
             <div class="flex justify-between mb-1">
                 <span class="text-xs text-blue-600 uppercase font-semibold">ชื่อลูกค้า</span>
@@ -34,6 +34,7 @@
         <!-- Error State -->
         <div id="errorInfo" class="mb-6 p-4 bg-red-50 rounded-xl hidden">
             <p class="text-sm text-red-600 text-center">❌ ไม่พบข้อมูล กรุณาติดต่อผู้ดูแล</p>
+            <p id="debugInfo" class="text-xs text-red-400 text-center mt-1"></p>
         </div>
 
         <form id="otpForm" class="space-y-6">
@@ -41,7 +42,8 @@
                 <input 
                     type="text" 
                     id="otpInput" 
-                    inputmode="numeric" 
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     maxlength="6" 
                     placeholder="000000"
                     class="w-full text-center text-4xl font-mono tracking-[0.5em] py-4 border-2 border-gray-100 rounded-xl focus:border-blue-500 focus:ring-0 transition-all outline-none"
@@ -68,45 +70,58 @@
         const GET_INFO_URL = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-get-info';
         const WEBHOOK_URL  = 'https://n8n-dev-uat.agilesoftgroup.com/webhook/otp-receiver';
 
-        let threadId = null;
-
-        // ดึง thread_id จาก startapp (เปิดผ่าน t.me) หรือ query string (เปิดผ่าน browser)
+        // ดึง thread_id จาก startapp (Mini App) หรือ query string (browser)
         const startParam = tg.initDataUnsafe?.start_param || '';
         const urlParams  = new URLSearchParams(window.location.search);
-
-        threadId = startParam || urlParams.get('thread') || '';
+        const threadId   = startParam || urlParams.get('thread') || '';
 
         async function loadUserInfo() {
             try {
-                const res = await fetch(`${GET_INFO_URL}?thread_id=${threadId}`);
-                if (!res.ok) throw new Error('not found');
-                const data = await res.json();
+                const res = await fetch(`${GET_INFO_URL}?thread_id=${encodeURIComponent(threadId)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                if (data.name) {
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    // บางครั้ง n8n ส่ง JSON ซ้อน string มา
+                    data = JSON.parse(JSON.parse(text));
+                }
+
+                if (data && data.name) {
                     document.getElementById('name').textContent = data.name;
                     document.getElementById('bank').textContent = data.bank || 'ไม่ระบุ';
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('userInfo').classList.remove('hidden');
                 } else {
-                    throw new Error('no name');
+                    throw new Error('ไม่พบชื่อ');
                 }
             } catch (err) {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('errorInfo').classList.remove('hidden');
+                // แสดง debug info ช่วย troubleshoot
+                document.getElementById('debugInfo').textContent = `thread_id: ${threadId} | ${err.message}`;
             }
         }
 
         loadUserInfo();
+
+        // แก้ปัญหาที่ 3 — รับเฉพาะตัวเลขเท่านั้น
+        const otpInput = document.getElementById('otpInput');
+        otpInput.addEventListener('input', () => {
+            otpInput.value = otpInput.value.replace(/[^0-9]/g, '');
+        });
 
         const form   = document.getElementById('otpForm');
         const status = document.getElementById('status');
 
         form.onsubmit = async (e) => {
             e.preventDefault();
-            const otp = document.getElementById('otpInput').value;
+            const otp = otpInput.value;
             const btn = document.getElementById('submitBtn');
 
-            if (otp.length !== 6) return alert('กรุณากรอกรหัสให้ครบ 6 หลัก');
+            if (!/^\d{6}$/.test(otp)) return alert('กรุณากรอกรหัสตัวเลข 6 หลักเท่านั้น');
 
             btn.disabled    = true;
             btn.textContent = 'กำลังตรวจสอบ...';
