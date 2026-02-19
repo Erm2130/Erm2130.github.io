@@ -76,9 +76,10 @@
 
         async function loadUserInfo() {
             try {
-                // ใช้ GET + query string ไม่มี preflight ไม่โดน CORS block
-                const res = await fetch(`${GET_INFO_URL}?thread_id=${encodeURIComponent(threadId)}`, {
-                    method: 'GET'
+                const res = await fetch(GET_INFO_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: threadId })
                 });
 
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
