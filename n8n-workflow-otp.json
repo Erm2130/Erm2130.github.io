@@ -1,0 +1,963 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "339a7c96-b11a-46e6-844a-1635f574016a",
+      "name": "Schedule Trigger (09:00)1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        8448,
+        3216
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "=-1003762993257",
+        "text": "=❌ *รหัส OTP ไม่ถูกต้อง!*\n--------------------------------------------\nรหัส OTP: `{{ $node[\"Webhook From Form1\"].json.body.otp }}` ที่คุณระบุไม่ตรงกับระบบ\nกรุณาตรวจสอบและลองทำรายการใหม่อีกครั้ง 🔄",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔐 กดปุ่มเพื่อกรอกรหัส OTP",
+                    "additionalFields": {
+                      "url": "=https://t.me/THENICK555_BOT/OTP?startapp={{ $('Webhook From Form1').item.json.body.id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $node[\"Webhook From Form1\"].json.body.thread_id }}"
+        }
+      },
+      "id": "3ea84548-a045-47e8-9fb4-80a72562d3c3",
+      "name": "Send OTP Failed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        9632,
+        4336
+      ],
+      "webhookId": "291851b3-e483-427b-b9dc-62f6ab941f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=-1003762993257",
+        "text": "=🎉 *ยืนยัน OTP สำเร็จ!*\n--------------------------------------------\nรหัส OTP: `{{ $node[\"Webhook From Form1\"].json.body.otp }}` ถูกต้อง\nระบบได้ทำรายการของคุณเรียบร้อยแล้ว ✅",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $node[\"Webhook From Form1\"].json.body.thread_id }}"
+        }
+      },
+      "id": "8fe2c985-4775-4a55-9e96-3d18aab49289",
+      "name": "Send OTP Success",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        9632,
+        4144
+      ],
+      "webhookId": "291851b3-e483-427b-b9dc-62f6ab941f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7397a089-e9bf-40cc-a138-fac41de8ad33",
+              "leftValue": "={{ $json.otp_matched }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        9344,
+        4240
+      ],
+      "id": "37609609-6b56-4e44-be02-4fb43e063070",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Telegram Trigger2\"].json.message.chat.id }}",
+        "text": "=🔐 *กรุณายืนยันตัวตน*\nกดปุ่มด้านล่างเพื่อกรอกรหัส OTP",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔐 กดปุ่มเพื่อกรอกรหัส OTP",
+                    "additionalFields": {
+                      "url": "=https://t.me/THENICK555_BOT/OTP?startapp={{ $node[\"Telegram Trigger2\"].json.message.message_thread_id || $node[\"Telegram Trigger2\"].json.message.chat.id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $node[\"Telegram Trigger2\"].json.message.message_thread_id }}"
+        }
+      },
+      "id": "60e0b43f-5dc6-4a43-b440-e8b711d81168",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        9888,
+        3648
+      ],
+      "webhookId": "291851b3-e483-427b-b9dc-62f6ab941f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=-1003762993257",
+        "text": "=👍 รับทราบครับ\nสถานะของคุณคือ: *{{ $json.status == 'ready' ? 'พร้อม' : 'ไม่พร้อม' }}*\nบันทึกลงระบบเรียบร้อยแล้ว",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $json.ID }}"
+        }
+      },
+      "id": "0d491134-69ec-4618-b85c-31972b2aa01f",
+      "name": "Reply Status1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        9280,
+        3648
+      ],
+      "webhookId": "291851b3-e483-427b-b9dc-62f6ab941f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://furthermost-lanelle-loonily.ngrok-free.dev/verify-otp",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"otp\": \"{{ $json.otp }}\",\n  \"session_id\": \"{{ $json.ID }}\"\n}\n",
+        "options": {}
+      },
+      "id": "aa0024ed-190b-42b9-b1d9-55304ccbe6ab",
+      "name": "Playwright Verify OTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        9136,
+        4240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "ID"
+          ]
+        },
+        "options": {}
+      },
+      "id": "7f4e8588-b2d2-4570-b8f3-d7657eab5054",
+      "name": "Update Status in Sheet2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        9088,
+        3648
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAENpXbEtZ6wtlNq",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "d9a170cd-5ff1-43c8-9179-f93c5bb62b5d",
+      "name": "Telegram Trigger2",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        8480,
+        3664
+      ],
+      "webhookId": "23a7f641-5113-4d02-bd6f-838861e29ad5",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://furthermost-lanelle-loonily.ngrok-free.dev/request-otp",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $json.TO }}\",\n  \"chat_id\": \"{{ $json.ID }}\"\n}",
+        "options": {}
+      },
+      "id": "55d55cb8-ff49-4089-85da-dc6d56046901",
+      "name": "Playwright Request OTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        9664,
+        3648
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U",
+          "mode": "list",
+          "cachedResultName": "Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "ID",
+              "lookupValue": "={{ $json.result.reply_to_message.message_thread_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9b8735dc-c709-40a4-a40e-6a445c5ca43d",
+      "name": "Get Phone from Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        9472,
+        3648
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAENpXbEtZ6wtlNq",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const topic_id = $json.message.message_thread_id || $json.message.chat.id;\nconst text = $json.message.text;\n\nlet status = '';\nif (text === '✅ พร้อม') status = 'ready';\nif (text === '❌ ไม่พร้อม') status = 'not_ready';\n\nreturn {\n  json: {\n    target_id: topic_id.toString(),\n    status: status,\n    chat_id: $json.message.chat.id,\n    message_thread_id: $json.message.message_thread_id\n  }\n};"
+      },
+      "id": "d619581a-4681-45df-a4b8-aba0fc36a60f",
+      "name": "Prep Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8896,
+        3648
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.message.text }}",
+              "operation": "regex",
+              "value2": "^(✅ พร้อม|❌ ไม่พร้อม)$"
+            }
+          ]
+        }
+      },
+      "id": "fadc0e48-56e7-463d-8aae-cc10cfb79dcf",
+      "name": "Check User Reply",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        8688,
+        3664
+      ]
+    },
+    {
+      "parameters": {
+        "unit": "seconds"
+      },
+      "id": "e1765df7-40f5-44d1-854d-ec6522de249a",
+      "name": "Wait 1s1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        9152,
+        3216
+      ],
+      "webhookId": "3cc2ec31-e309-4de4-ad37-14f8da2238a2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6ffc9aba-5224-4aa0-8328-eef532d0fe3d",
+      "name": "Loop Users1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        8928,
+        3216
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U",
+          "mode": "list",
+          "cachedResultName": "Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "a5df73ec-e866-4493-8ff4-70ddd30924f2",
+      "name": "Read Users (Topics)1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        8704,
+        3216
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAENpXbEtZ6wtlNq",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=-1003762993257",
+        "text": "=🔔 *แจ้งเตือนสถานะ*\nคุณ {{ $json.name }} (ธนาคาร {{ $json.bank_name }})\n\nกรุณากดปุ่มด้านล่างเพื่อยืนยันความพร้อม:",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ พร้อม",
+                    "additionalFields": {}
+                  },
+                  {
+                    "text": "❌ ไม่พร้อม",
+                    "additionalFields": {}
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {},
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $json.ID }}"
+        }
+      },
+      "id": "74f7934b-c0b2-4c52-9ca0-5e399af232d2",
+      "name": "Send Buttons (Setup Required)1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        9392,
+        3216
+      ],
+      "webhookId": "b079984d-2622-47b1-985b-52f2e8bc9251",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ name: $json.bank_name || '', bank: $json.Account_No || '' }) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "cfb50897-31e1-4ff5-a3de-d9256c1e203f",
+      "name": "Respond With Data1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        9008,
+        3952
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U",
+          "mode": "list",
+          "cachedResultName": "Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "ID",
+              "lookupValue": "={{ $json.body.thread_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ac2af674-36cb-4801-a936-cca3e39443a1",
+      "name": "Get Info For MiniApp1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        8752,
+        3952
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAENpXbEtZ6wtlNq",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "otp-get-info",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a0273fd6-6b51-4e3c-8b62-6cd1a63cadf0",
+      "name": "Webhook Get Info1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        8496,
+        3952
+      ],
+      "webhookId": "otp-get-info-webhook"
+    },
+    {
+      "parameters": {
+        "chatId": "=-1003762993257",
+        "text": "=🕐 *ได้รับรหัสผ่านฟอร์มเรียบร้อย*\n--------------------------------------------\nระบบได้รับ OTP: `{{ $node[\"Webhook From Form1\"].json.body.otp }}`\nเรากำลังตรวจสอบข้อมูลของคุณในขณะนี้...",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "message_thread_id": "={{ $node[\"Webhook From Form1\"].json.body.thread_id }}"
+        }
+      },
+      "id": "aef9f585-5680-49fb-8a3b-baac932b14dd",
+      "name": "Send Confirmation1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        8704,
+        4240
+      ],
+      "webhookId": "291851b3-e483-427b-b9dc-62f6ab941f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "pQxEcovCOMVxVkzf",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U",
+          "mode": "list",
+          "cachedResultName": "Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CikNqDkTJ_x2aJS2UbGYuuUxykKURlOIIsb_kFrJt5U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Webhook From Form1').item.json.body.id }}",
+            "otp": "={{ $('Webhook From Form1').item.json.body.otp }}",
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "bank_name",
+              "displayName": "bank_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "BU",
+              "displayName": "BU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Account_No",
+              "displayName": "Account_No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "otp",
+              "displayName": "otp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7f821f7a-d416-4372-a587-73c8f9a077e8",
+      "name": "Save OTP to Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        8928,
+        4240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAENpXbEtZ6wtlNq",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "otp-receiver",
+        "options": {}
+      },
+      "id": "610e95b6-90d6-4682-89b3-da7789ca6d5e",
+      "name": "Webhook From Form1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        8480,
+        4240
+      ],
+      "webhookId": "03fae4e9-553e-4900-928a-ca5f0ac52b10"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (09:00)1": {
+      "main": [
+        [
+          {
+            "node": "Read Users (Topics)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send OTP Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send OTP Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Status1": {
+      "main": [
+        [
+          {
+            "node": "Get Phone from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Playwright Verify OTP": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status in Sheet2": {
+      "main": [
+        [
+          {
+            "node": "Reply Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Check User Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Playwright Request OTP": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Phone from Sheets": {
+      "main": [
+        [
+          {
+            "node": "Playwright Request OTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Data": {
+      "main": [
+        [
+          {
+            "node": "Update Status in Sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Reply": {
+      "main": [
+        [
+          {
+            "node": "Prep Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1s1": {
+      "main": [
+        [
+          {
+            "node": "Send Buttons (Setup Required)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Users1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait 1s1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Users (Topics)1": {
+      "main": [
+        [
+          {
+            "node": "Loop Users1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Buttons (Setup Required)1": {
+      "main": [
+        [
+          {
+            "node": "Loop Users1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Info For MiniApp1": {
+      "main": [
+        [
+          {
+            "node": "Respond With Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Get Info1": {
+      "main": [
+        [
+          {
+            "node": "Get Info For MiniApp1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation1": {
+      "main": [
+        [
+          {
+            "node": "Save OTP to Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save OTP to Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Playwright Verify OTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook From Form1": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e290665da72e832015ad1c6d3046684b3949203c7816d8e9845b4caa7e1e367f"
+  }
+}
